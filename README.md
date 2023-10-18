@@ -9,3 +9,5 @@ This repository includes:
     -   Assignment code
 
     -   Git hub command review notes
+
+    -   Git set up details
