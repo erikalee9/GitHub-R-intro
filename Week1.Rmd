@@ -1,0 +1,255 @@
+---
+title: "Week1"
+author: "Erika Lee"
+date: "2023-10-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r}
+source("setup.R")
+```
+
+```{r}
+library(palmerpenguins)
+library(dplyr)
+data(penguins)
+```
+
+### Week 1 Assignment:
+
+Data Types
+
+```{r}
+class(penguins)
+str(penguins)
+```
+
+```{r}
+class(penguins$species)
+str(penguins$species)
+```
+
+Creating Lists
+
+```{r}
+myList <- list("apple", 1993, FALSE, penguins)
+str(myList)
+```
+
+```{r}
+names(myList) <- c("fruit", "year", "logic", "data")
+names(myList)
+```
+
+Indexing
+
+```{r}
+# for lists we use double brackes [[]]
+myList[[1]]
+
+myList[["data"]]
+```
+
+```{r}
+#for indexing vectors
+# for vectors we use single brackets []
+myVector <- c("apple", "banana", "pear")
+myVector[2]
+```
+
+```{r}
+# indexing data frames
+# dataframe[row(s), columns()]
+penguins[1:5, 2]
+
+penguins[1:5, "island"]
+
+penguins[1, 1:5]
+
+penguins[1:5, c("species","sex")]
+
+penguins[penguins$sex=='female',]
+
+# $ for a single column
+penguins$species
+```
+
+Dplyr Package:
+
+Subsetting rows with filter()
+
+```{r}
+filter(penguins, species == "Adelie")
+
+filter(penguins, species != "Adelie")
+
+filter(penguins, island %in% c("Dream", "Torgersen") & !is.na(bill_length_mm))
+```
+
+Selecting columns with select()
+
+```{r}
+# Select two specific variables
+select(penguins, species, sex)
+
+# Select a range of variables
+select(penguins, species:flipper_length_mm)
+
+# Rename columns within select
+select(penguins, genus = species, island)
+
+# Select column variables that are recorded in mm
+select(penguins, contains("mm"))
+```
+
+Creating new variables with mutate
+
+```{r}
+# New variable that calculates bill length in cm
+mutate(penguins, bill_length_cm = bill_length_mm/10)
+
+# mutate based on conditional statements
+mutate(penguins, species_sex = if_else(sex == 'male', paste0(species,"_m"), paste0(species, "_f")))
+```
+
+Piping
+
+```{r}
+df1 <- filter(penguins, island == "Dream")
+df2 <- mutate(df1, flipper_length_cm = flipper_length_mm/10)
+df3 <- select(df2, species, year, flipper_length_cm)
+
+print(df3)
+```
+
+```{r}
+penguins %>% 
+  filter(island == "Dream") %>% 
+  mutate(flipper_length_cm = flipper_length_mm/10) %>% 
+  select(species, year, flipper_length_cm)
+```
+
+Summarize data by a specific group (e.g. average body mass)
+
+```{r}
+penguins %>% 
+  group_by(species) %>% 
+  summarise(body_mass_avg = mean(body_mass_g, na.rm = TRUE))
+```
+
+Get a count of something
+
+```{r}
+penguins %>% 
+  group_by(species, year) %>% 
+  summarise(n_observations = n())
+```
+
+7.  Visualize
+
+    ```{r}
+    #install.packages("ggplot2")
+    library(ggplot2)
+    ```
+
+General structure for ggplot:
+
+ggplot(data = \<DATA\>) +
+
+\<GEOM_FUNCTION\>(mapping = aes(\<MAPPINGS\>))
+
+Histograms:
+
+```{r}
+# Histogram example: flipper length by species
+ggplot(penguins) +
+  geom_histogram(aes(x = flipper_length_mm, fill = species), alpha = 0.5, position = "identity") +
+  scale_fill_manual(values = c("darkorange","darkorchid","cyan4"))
+```
+
+Bar plot:
+
+```{r}
+ggplot(penguins) +
+  geom_bar(mapping = aes(x = island, fill = species))
+```
+
+Customized simple bar plot:
+
+```{r}
+ggplot(penguins, aes(x = island, fill = species)) +
+  geom_bar(alpha = 0.8) +
+  scale_fill_manual(values = c("darkorange","purple","cyan4"), 
+                    guide = FALSE) +
+  theme_minimal() +
+  facet_wrap(~species, ncol = 1) +
+  coord_flip()
+```
+
+Scatterplots:
+
+```{r}
+ggplot(penguins) +
+  geom_point(mapping = aes(x = body_mass_g, y = flipper_length_mm, color = species))
+```
+
+8.  Read and write data
+
+There are many ways to read and write data in R. To read in .csv files, you can use `read_csv()` which is included in the Tidyverse with the `readr` package, and to save csv files use `write_csv()`. The `readxl` package is great for reading in excel files, however it is not included in the Tidyverse and will need to be loaded separately.
+
+### Week 1 Notes
+
+2023.10.18
+
+**Git command review:**
+
+Order of commands to create repository
+
+1.  git clone { https code} - only use once on a computer (at beginning of project)
+
+2.  git status - tells you the status of git files - can use this whenever!
+
+3.  Step 1. git pull - pulls any edits made somewhere else
+
+    -   prevents any issues with conflicting files
+
+    1.  Creating a readme file - the homepage for a repository
+        -   go to repository on github and see if there is already a README.file - if you set up repository with the readme file clicked, then it will already be there.
+        -   If README was not created.... in r - go to file \> new file \> new markdown file
+        -   name as README.md and save
+            -   .md documents can be treated almost exactly as rmarkdown files... can use visual editor with .md, change header level, insert images, etc.
+        -   push this to repository
+
+4.  Step 2. git add {insert name of files to be added} - will add everything that is red or unchecked, OR you can just check them in the git tab on r
+
+5.  Step 3. git commit -m "message in quotes"
+
+    1.  Can go to check boxes in git tab and type commit message in git GUI window OR
+    2.  add git commit -m "..." to terminal...
+
+6.  Step 4. git push
+
+    1.  Can push with green up arrow in git tab OR
+    2.  Type git push into terminal
+
+**Git Set Up Details:**
+
+Git Username Set up - complete
+
+```{r}
+## install if needed (do this exactly once):
+install.packages("usethis")
+
+library(usethis)
+use_git_config(user.name = "Erika Lee", user.email = "erika.lee@colostate.edu")
+```
+
+Git token, only need to do this once - complete
+
+```{r}
+gitcreds::gitcreds_set()
+```
